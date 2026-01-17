@@ -7,7 +7,6 @@ import com.example.safeguard.SafeGuardApplication
 
 object PenyediaViewModel {
     val Factory = viewModelFactory {
-        // Initializer khusus LoginViewModel
         initializer {
             val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
             LoginViewModel(
@@ -16,7 +15,6 @@ object PenyediaViewModel {
             )
         }
 
-        // Initializer khusus DashboardViewModel
         initializer {
             val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
             DashboardViewModel(
@@ -24,11 +22,12 @@ object PenyediaViewModel {
             )
         }
 
-        // Initializer khusus TambahBarangViewModel (Tambahkan ini agar tidak error di PetaNavigasi)
+        // PERBAIKAN DI SINI: Tambahkan userPreferences
         initializer {
             val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
             TambahBarangViewModel(
-                itemApiService = aplikasi.container.itemApiService
+                itemApiService = aplikasi.container.itemApiService,
+                userPreferences = aplikasi.container.userPreferences // SUNTIKKAN INI
             )
         }
 
@@ -36,6 +35,13 @@ object PenyediaViewModel {
             val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
             RegisterViewModel(
                 apiService = aplikasi.container.authApiService
+            )
+        }
+
+        initializer {
+            val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
+            EditItemViewModel(
+                itemApiService = aplikasi.container.itemApiService
             )
         }
     }

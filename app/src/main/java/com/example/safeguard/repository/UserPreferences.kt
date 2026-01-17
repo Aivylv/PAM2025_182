@@ -15,7 +15,11 @@ class UserPreferences(private val context: Context) {
         private val USER_ID = stringPreferencesKey("user_id")
     }
 
+    //Mengambil Token untuk Header API
     val authToken: Flow<String?> = context.dataStore.data.map { it[TOKEN_KEY] }
+
+    //Mengambil User ID untuk Audit Trail (Siapa yang mencatat barang)
+    val userId: Flow<String?> = context.dataStore.data.map { it[USER_ID] }
 
     suspend fun saveSession(token: String, userId: String) {
         context.dataStore.edit { pref ->

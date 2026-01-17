@@ -33,29 +33,28 @@ class LoginViewModel(
         uiState = uiState.copy(password = password, errorMessage = null)
     }
 
-    fun login(onSuccess: () -> Unit) {
-        // REQ-2: Validasi kolom tidak boleh kosong
-        if (uiState.email.isBlank() || uiState.password.isBlank()) {
-            uiState = uiState.copy(errorMessage = "Email dan Password wajib diisi")
-            return
-        }
-
+    fun login(onLoginSuccess: () -> Unit) {
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, errorMessage = null)
             try {
-                // REQ-3: Verifikasi kredensial ke MySQL via API
                 val response = apiService.login(uiState.email, uiState.password)
-                if (response.success && response.token != null) {
-                    // REQ-4: Simpan sesi login
-                    userPreferences.saveSession(response.token, response.user?.user_id.toString())
+
+                if (response.success) {
+
+                    //simpan session token & user_id
+                    userPreferences.saveSession(
+                        response.token ?: "",
+                        response.user?.user_id.toString()
+                    )
+
                     uiState = uiState.copy(isLoading = false, success = true)
-                    onSuccess()
+                    onLoginSuccess()
                 } else {
                     uiState = uiState.copy(isLoading = false, errorMessage = response.message)
                 }
             } catch (e: Exception) {
-                // REQ-344: Penanganan koneksi lambat/terputus
-                uiState = uiState.copy(isLoading = false, errorMessage = "Gagal terhubung ke server")
+                //tampilkan pesan error asli untuk debugging
+                uiState = uiState.copy(isLoading = false, errorMessage = "Error: ${e.message}")
             }
         }
     }

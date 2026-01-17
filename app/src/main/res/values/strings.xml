@@ -12,4 +12,5 @@
     <string name="error_empty_fields">Semua kolom wajib diisi</string>
     <string name="error_connection">Gagal terhubung ke server</string>
     <string name="success_register">Registrasi berhasil, silakan login</string>
+    <string name="input">Masukkan identitas pemilik barang</string>
 </resources>

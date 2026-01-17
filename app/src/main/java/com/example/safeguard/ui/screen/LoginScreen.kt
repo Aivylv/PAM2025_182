@@ -34,7 +34,7 @@ fun LoginScreen(
             onValueChange = { viewModel.onEmailChange(it) },
             label = { Text(stringResource(R.string.email_label)) },
             modifier = Modifier.fillMaxWidth(),
-            isError = uiState.errorMessage != null // Menandai field merah jika error
+            isError = uiState.errorMessage != null
         )
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacer_medium)))
@@ -45,10 +45,10 @@ fun LoginScreen(
             label = { Text(stringResource(R.string.password_label)) },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            isError = uiState.errorMessage != null // Menandai field merah jika error
+            isError = uiState.errorMessage != null
         )
 
-        // --- TAMBAHAN: MENAMPILKAN PESAN ERROR (REQ-282 & REQ-344) ---
+        //MENAMPILKAN PESAN ERROR (REQ-282 & REQ-344)
         uiState.errorMessage?.let { error ->
             Text(
                 text = error,
@@ -60,11 +60,11 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacer_large)))
 
-        // --- TAMBAHAN: INDIKATOR LOADING & DISABLE TOMBOL ---
+        //INDIKATOR LOADING & DISABLE TOMBOL
         Button(
             onClick = { viewModel.login(onLoginSuccess) },
             modifier = Modifier.fillMaxWidth(),
-            enabled = !uiState.isLoading // Tombol mati saat proses kirim data
+            enabled = !uiState.isLoading
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(
