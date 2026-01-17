@@ -3,6 +3,8 @@ package com.example.safeguard.ui.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,7 +21,14 @@ fun TambahPasienScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Pendaftaran Pasien Baru") })
+            TopAppBar(
+                title = { Text("Pendaftaran Pasien Baru") },
+                navigationIcon = {
+                    IconButton(onClick = navigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                    }
+                }
+            )
         }
     ) { innerPadding ->
         Column(

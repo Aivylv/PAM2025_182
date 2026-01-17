@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,13 +21,21 @@ fun TambahBarangScreen(
     val uiState = viewModel.uiState
     var expanded by remember { mutableStateOf(false) }
 
-    // Launcher untuk mengambil foto (REQ-252)
+    //Launcher untuk mengambil foto (REQ-252)
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> viewModel.onImageSelected(uri) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Input Barang Baru") }) }
+        topBar = { TopAppBar(
+            title = {
+                Text("Input Barang Baru") },
+            navigationIcon = {
+                IconButton(onClick = navigateBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                }
+            })
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -107,7 +116,7 @@ fun TambahBarangScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isSaving) CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
-                else Text("Simpan Data (REQ-253)")
+                else Text("Simpan Data")
             }
         }
     }

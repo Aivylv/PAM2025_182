@@ -10,7 +10,22 @@ object DestinasiLogin : DestinasiNavigasi {
     override val titleRes = "Login Petugas"
 }
 
-object DestinasiDashboard : DestinasiNavigasi {
+object DestinasiRegister : DestinasiNavigasi {
+    override val route = "register"
+    override val titleRes = "Daftar Akun"
+}
+
+object DestinasiHome : DestinasiNavigasi {
     override val route = "dashboard"
-    override val titleRes = "Dashboard Barang Sitaan"
+    override val titleRes = "Dashboard Barang"
+}
+
+object DestinasiEntry : DestinasiNavigasi {
+    override val route = "tambah_barang"
+    override val titleRes = "Input Barang"
+}
+
+object DestinasiDetail : DestinasiNavigasi {
+    override val route = "detail_barang"
+    override val titleRes = "Detail Barang"
 }

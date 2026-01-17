@@ -1,116 +1,162 @@
 package com.example.safeguard.ui.screen
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.safeguard.modeldata.Item
 import com.example.safeguard.ui.viewmodel.DashboardUiState
 import com.example.safeguard.ui.viewmodel.DashboardViewModel
+import com.example.safeguard.ui.viewmodel.PenyediaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel,
-    onFabClick: () -> Unit,
-    onItemClick: (Int) -> Unit
+    navigateToItemEntry: () -> Unit,
+    navigateToPatientEntry: () -> Unit,
+    onItemClick: (Int) -> Unit,
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: DashboardViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
-    //REQ-10: State untuk input pencarian
-    var searchQuery by remember { mutableStateOf("") }
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(title = { Text("Dashboard SafeGuard RSJ") })
+            TopAppBar(
+                title = { Text("Dashboard SafeGuard") },
+                actions = {
+                    IconButton(onClick = navigateToPatientEntry) {
+                        Icon(
+                            imageVector = Icons.Default.PersonAdd,
+                            contentDescription = "Tambah Pasien"
+                        )
+                    }
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Logout",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onFabClick) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah Barang")
+            FloatingActionButton(
+                onClick = navigateToItemEntry
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Tambah Barang"
+                )
             }
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        DashboardBody(
+            uiState = viewModel.dashboardUiState,
+            onItemClick = onItemClick,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
 
-            //Search Bar
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    //memanggil fungsi getItems yang sudah diperbaiki di ViewModel
-                    viewModel.getItems(query = it)
-                },
+@Composable
+fun DashboardBody(
+    uiState: DashboardUiState,
+    onItemClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (uiState) {
+        is DashboardUiState.Loading -> Text(text = "Loading...", modifier = modifier)
+        is DashboardUiState.Success -> ListItemList(
+            items = uiState.items,
+            onItemClick = onItemClick,
+            modifier = modifier
+        )
+        is DashboardUiState.Error -> Text(text = "Gagal memuat data", modifier = modifier)
+    }
+}
+
+@Composable
+fun ListItemList(
+    items: List<Item>,
+    onItemClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(items) { item ->
+            ItemCard(
+                item = item,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                placeholder = { Text("Cari Pasien / Barang...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true
+                    .padding(vertical = 8.dp)
+                    .clickable { onItemClick(item.item_id ?: 0) }
             )
-
-            //Konten Utama
-            when (val state = viewModel.dashboardUiState) {
-                is DashboardUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                is DashboardUiState.Success -> {
-                    if (state.items.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Data tidak ditemukan / Kosong")
-                        }
-                    } else {
-                        LazyColumn {
-                            items(state.items) { item ->
-                                //memanggil ItemCard yang didefinisikan di bawah
-                                ItemCard(
-                                    item = item,
-                                    onClick = { item.item_id?.let { id -> onItemClick(id) } }
-                                )
-                            }
-                        }
-                    }
-                }
-                is DashboardUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Gagal terhubung ke server")
-                    }
-                }
-            }
         }
     }
 }
 
 @Composable
-fun ItemCard(item: Item, onClick: () -> Unit) {
+fun ItemCard(
+    item: Item,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Text(
-                text = "Pasien: ${item.patient_id ?: "-"}",
+                text = item.item_name,
                 style = MaterialTheme.typography.titleMedium
             )
-            Text(
-                text = "Barang: ${item.item_name}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = "Status: ${item.status}",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Status: ${item.status}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = item.condition,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
 }
