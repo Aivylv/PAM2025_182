@@ -3,42 +3,67 @@ package com.example.safeguard.ui.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.safeguard.modeldata.Item
 import com.example.safeguard.network.ItemApiService
 import kotlinx.coroutines.launch
 
-class EditItemViewModel(private val itemApiService: ItemApiService) : ViewModel() {
-    var itemState by mutableStateOf(Item(item_name = "", condition = "", status = "", user_id = 0, patient_id = 0))
+data class DetailUiState(
+    val item: Item = Item(0, "", "", null, "Disimpan", "", "", 0, 0), // Default kosong
+    val isLoading: Boolean = true,
+    val isError: Boolean = false,
+    val errorMessage: String = ""
+)
+
+class EditItemViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val itemApiService: ItemApiService
+) : ViewModel() {
+
+    private val itemId: Int = checkNotNull(savedStateHandle["itemId"])
+
+    var uiState by mutableStateOf(DetailUiState())
         private set
 
-    // REQ-18: Memfasilitasi pengubahan atribut data barang
-    fun updateStatus(newStatus: String, receiver: String, onSuccess: () -> Unit) {
-        // REQ-330: Validasi pengisian nama penerima jika status "Dikembalikan"
-        if (newStatus == "Dikembalikan" && receiver.isBlank()) {
-            return // Tampilkan error di UI jika perlu
-        }
+    init {
+        fetchItemDetails()
+    }
 
+    fun fetchItemDetails() {
+        viewModelScope.launch {
+            uiState = uiState.copy(isLoading = true, isError = false)
+            try {
+                val item = itemApiService.getItem(itemId)
+                uiState = uiState.copy(item = item, isLoading = false)
+            } catch (e: Exception) {
+                uiState = uiState.copy(
+                    isLoading = false,
+                    isError = true,
+                    errorMessage = "Gagal memuat data: ${e.message}"
+                )
+            }
+        }
+    }
+
+    fun updateStatus(status: String, receiver: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                val updatedItem = itemState.copy(status = newStatus, receiver = receiver)
-                itemState.item_id?.let { id ->
-                    val response = itemApiService.updateItem(id, updatedItem)
-                    if (response.isSuccessful) onSuccess()
+                val updatedItem = uiState.item.copy(status = status, receiver = receiver)
+                val response = itemApiService.updateItem(itemId, updatedItem)
+                if (response.isSuccessful) {
+                    onSuccess()
                 }
             } catch (e: Exception) { /* Handle error */ }
         }
     }
 
-    // REQ-270: Eksekusi penghapusan permanen
     fun deleteItem(onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                itemState.item_id?.let { id ->
-                    val response = itemApiService.deleteItem(id)
-                    if (response.isSuccessful) onSuccess()
-                }
+                val response = itemApiService.deleteItem(itemId)
+                if (response.isSuccessful) onSuccess()
             } catch (e: Exception) { /* Handle error */ }
         }
     }

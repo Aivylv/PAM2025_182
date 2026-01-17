@@ -38,4 +38,7 @@ interface ItemApiService {
 
     @DELETE("items/{id}")
     suspend fun deleteItem(@Path("id") id: Int): retrofit2.Response<Void>
+
+    @GET("items/{id}")
+    suspend fun getItem(@Path("id") id: Int): Item
 }

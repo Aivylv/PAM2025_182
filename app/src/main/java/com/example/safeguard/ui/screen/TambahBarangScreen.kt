@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.safeguard.ui.viewmodel.TambahBarangViewModel
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,12 +20,38 @@ fun TambahBarangScreen(
     navigateBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
+    val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     //Launcher untuk mengambil foto (REQ-252)
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> viewModel.onImageSelected(uri) }
+
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = {  },
+            title = { Text("Berhasil!") },
+            text = { Text("Data barang berhasil disimpan ke sistem.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showSuccessDialog = false
+                        navigateBack() //Kembali ke Dashboard
+                    }
+                ) { Text("Lihat Daftar Barang") }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        showSuccessDialog = false
+                        viewModel.resetForm()
+                    }
+                ) { Text("Tambah Barang Lagi") }
+            }
+        )
+    }
 
     Scaffold(
         topBar = { TopAppBar(
@@ -111,7 +138,9 @@ fun TambahBarangScreen(
 
             // 5. Tombol Simpan (REQ-253)
             Button(
-                onClick = { viewModel.saveItem(navigateBack) },
+                onClick = {
+                    viewModel.saveItem(context, navigateBack)
+                },
                 enabled = uiState.isEntryValid && !uiState.isSaving,
                 modifier = Modifier.fillMaxWidth()
             ) {

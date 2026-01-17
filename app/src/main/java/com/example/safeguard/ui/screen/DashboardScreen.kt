@@ -1,30 +1,37 @@
 package com.example.safeguard.ui.screen
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -45,39 +52,48 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    //Auto Refresh saat halaman dibuka kembali
+    LaunchedEffect(Unit) {
+        viewModel.getDashboardUiState()
+    }
 
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text("Dashboard SafeGuard") },
-                actions = {
-                    IconButton(onClick = navigateToPatientEntry) {
-                        Icon(
-                            imageVector = Icons.Default.PersonAdd,
-                            contentDescription = "Tambah Pasien"
-                        )
+            Column {
+                TopAppBar(
+                    title = { Text("Dashboard SafeGuard") },
+                    actions = {
+                        IconButton(onClick = navigateToPatientEntry) {
+                            Icon(Icons.Default.PersonAdd, contentDescription = "Tambah Pasien")
+                        }
+                        IconButton(onClick = onLogout) {
+                            Icon(Icons.Default.ExitToApp, tint = MaterialTheme.colorScheme.error, contentDescription = "Logout")
+                        }
                     }
-                    IconButton(onClick = onLogout) {
-                        Icon(
-                            imageVector = Icons.Default.ExitToApp,
-                            contentDescription = "Logout",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior
-            )
+                )
+                //Search Bar di Toolbar/Atas
+                OutlinedTextField(
+                    value = viewModel.searchQuery,
+                    onValueChange = { viewModel.updateSearchQuery(it) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    placeholder = { Text("Cari barang atau nama pasien...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (viewModel.searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.updateSearchQuery("") }) {
+                                Icon(Icons.Default.Close, contentDescription = "Hapus")
+                            }
+                        }
+                    },
+                    singleLine = true
+                )
+            }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToItemEntry
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Tambah Barang"
-                )
+            FloatingActionButton(onClick = navigateToItemEntry) {
+                Icon(Icons.Default.Add, contentDescription = "Tambah Barang")
             }
         }
     ) { innerPadding ->
@@ -96,13 +112,15 @@ fun DashboardBody(
     modifier: Modifier = Modifier
 ) {
     when (uiState) {
-        is DashboardUiState.Loading -> Text(text = "Loading...", modifier = modifier)
-        is DashboardUiState.Success -> ListItemList(
-            items = uiState.items,
-            onItemClick = onItemClick,
-            modifier = modifier
-        )
-        is DashboardUiState.Error -> Text(text = "Gagal memuat data", modifier = modifier)
+        is DashboardUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        is DashboardUiState.Success -> {
+            if (uiState.items.isEmpty()) {
+                Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Tidak ada data barang.") }
+            } else {
+                ListItemList(items = uiState.items, onItemClick = onItemClick, modifier = modifier)
+            }
+        }
+        is DashboardUiState.Error -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Gagal memuat data") }
     }
 }
 

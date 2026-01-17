@@ -13,5 +13,7 @@ data class Item(
     val entry_date: String? = null,  // Waktu dicatat [cite: 403]
     val receiver: String? = null,    // Nama penerima saat diambil [cite: 403]
     val user_id: Int,                // FK ke tabel Users [cite: 403]
-    val patient_id: Int              // FK ke tabel Patients [cite: 403]
+    val patient_id: Int,              // FK ke tabel Patients [cite: 403]
+    val patient_name: String? = null,
+    val rm_number: String? = null
 )

@@ -20,26 +20,34 @@ class DashboardViewModel(private val itemApiService: ItemApiService) : ViewModel
     var dashboardUiState: DashboardUiState by mutableStateOf(DashboardUiState.Loading)
         private set
 
+    // State untuk Search Bar
+    var searchQuery by mutableStateOf("")
+        private set
+
     init {
-        getItems() // Panggil load data awal
+        getDashboardUiState()
     }
 
-    //REQ-10 (Search) dan REQ-6 (Read All) sekaligus
-    fun getItems(query: String = "") {
+    fun getDashboardUiState() {
         viewModelScope.launch {
             dashboardUiState = DashboardUiState.Loading
             dashboardUiState = try {
-                val listResult = if (query.isBlank()) {
-                    itemApiService.getItems() // Ambil semua jika query kosong
+                val items = if (searchQuery.isBlank()) {
+                    itemApiService.getItems()
                 } else {
-                    itemApiService.searchItems(query) // Cari jika ada query
+                    itemApiService.searchItems(searchQuery)
                 }
-                DashboardUiState.Success(listResult)
+                DashboardUiState.Success(items)
             } catch (e: IOException) {
                 DashboardUiState.Error
             } catch (e: Exception) {
                 DashboardUiState.Error
             }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        searchQuery = query
+        getDashboardUiState()
     }
 }
