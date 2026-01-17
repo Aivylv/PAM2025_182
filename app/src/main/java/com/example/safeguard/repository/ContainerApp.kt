@@ -3,6 +3,7 @@ package com.example.safeguard.repository
 import android.content.Context
 import com.example.safeguard.network.AuthApiService
 import com.example.safeguard.network.ItemApiService
+import com.example.safeguard.network.PatientApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -17,6 +18,7 @@ interface ContainerApp {
     val userPreferences: UserPreferences
     val authApiService: AuthApiService
     val itemApiService: ItemApiService
+    val patientApiService: PatientApiService
 }
 
 class DefaultContainerApp(private val context: Context) : ContainerApp {
@@ -68,5 +70,9 @@ class DefaultContainerApp(private val context: Context) : ContainerApp {
 
     override val itemApiService: ItemApiService by lazy {
         retrofit.create(ItemApiService::class.java)
+    }
+
+    override val patientApiService: PatientApiService by lazy {
+        retrofit.create(PatientApiService::class.java)
     }
 }

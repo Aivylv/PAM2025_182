@@ -44,7 +44,8 @@ android {
 }
 
 dependencies {
-// UI Framework: Jetpack Compose Material 3 [cite: 184, 278]
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.material3)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

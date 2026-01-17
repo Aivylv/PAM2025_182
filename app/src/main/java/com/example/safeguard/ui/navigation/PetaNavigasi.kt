@@ -19,6 +19,8 @@ import com.example.safeguard.ui.viewmodel.LoginViewModel
 import com.example.safeguard.ui.viewmodel.PenyediaViewModel
 import com.example.safeguard.ui.viewmodel.RegisterViewModel
 import com.example.safeguard.ui.viewmodel.TambahBarangViewModel
+import com.example.safeguard.ui.screen.TambahPasienScreen
+import com.example.safeguard.ui.viewmodel.PasienViewModel
 
 @Composable
 fun PetaNavigasi(

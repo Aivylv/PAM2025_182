@@ -22,12 +22,12 @@ object PenyediaViewModel {
             )
         }
 
-        // PERBAIKAN DI SINI: Tambahkan userPreferences
         initializer {
             val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
             TambahBarangViewModel(
                 itemApiService = aplikasi.container.itemApiService,
-                userPreferences = aplikasi.container.userPreferences // SUNTIKKAN INI
+                patientApiService = aplikasi.container.patientApiService,
+                userPreferences = aplikasi.container.userPreferences
             )
         }
 
@@ -42,6 +42,13 @@ object PenyediaViewModel {
             val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
             EditItemViewModel(
                 itemApiService = aplikasi.container.itemApiService
+            )
+        }
+
+        initializer {
+            val aplikasi = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as SafeGuardApplication)
+            PasienViewModel(
+                patientApiService = aplikasi.container.patientApiService
             )
         }
     }
