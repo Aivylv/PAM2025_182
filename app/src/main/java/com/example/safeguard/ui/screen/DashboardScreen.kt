@@ -30,13 +30,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,18 +42,20 @@ import com.example.safeguard.modeldata.Item
 import com.example.safeguard.ui.viewmodel.DashboardUiState
 import com.example.safeguard.ui.viewmodel.DashboardViewModel
 import com.example.safeguard.ui.viewmodel.PenyediaViewModel
+import androidx.compose.material.icons.filled.Info
+import com.example.safeguard.ui.navigation.DestinasiHelp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     navigateToItemEntry: () -> Unit,
     navigateToPatientEntry: () -> Unit,
+    navigateToHelp: () -> Unit,
     onItemClick: (Int) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
-    //Auto Refresh saat halaman dibuka kembali
     LaunchedEffect(Unit) {
         viewModel.getDashboardUiState()
     }
@@ -66,6 +66,9 @@ fun DashboardScreen(
                 TopAppBar(
                     title = { Text("Dashboard SafeGuard") },
                     actions = {
+                        IconButton(onClick = navigateToHelp) {
+                            Icon(Icons.Default.Info, contentDescription = "Bantuan")
+                        }
                         IconButton(onClick = navigateToPatientEntry) {
                             Icon(Icons.Default.PersonAdd, contentDescription = "Tambah Pasien")
                         }
@@ -74,7 +77,6 @@ fun DashboardScreen(
                         }
                     }
                 )
-                //Search Bar di Toolbar/Atas
                 OutlinedTextField(
                     value = viewModel.searchQuery,
                     onValueChange = { viewModel.updateSearchQuery(it) },

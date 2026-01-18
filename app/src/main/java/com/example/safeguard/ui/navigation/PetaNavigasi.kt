@@ -18,7 +18,6 @@ import com.example.safeguard.ui.screen.LoginScreen
 import com.example.safeguard.ui.screen.RegisterScreen
 import com.example.safeguard.ui.screen.TambahBarangScreen
 import com.example.safeguard.ui.screen.TambahPasienScreen
-import com.example.safeguard.ui.viewmodel.DashboardViewModel
 import com.example.safeguard.ui.viewmodel.EditItemViewModel
 import com.example.safeguard.ui.viewmodel.LoginViewModel
 import com.example.safeguard.ui.viewmodel.PasienViewModel
@@ -26,6 +25,10 @@ import com.example.safeguard.ui.viewmodel.PenyediaViewModel
 import com.example.safeguard.ui.viewmodel.RegisterViewModel
 import com.example.safeguard.ui.viewmodel.TambahBarangViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.safeguard.ui.screen.HelpScreen
+import com.example.safeguard.ui.screen.OnboardingScreen
 
 @Composable
 fun PetaNavigasi(
@@ -35,11 +38,31 @@ fun PetaNavigasi(
     val context = LocalContext.current
     val userPreferences = UserPreferences(context)
     val scope = rememberCoroutineScope()
+    val isFirstRun by userPreferences.isFirstRun.collectAsState(initial = true)
+    val startDest = if (isFirstRun) DestinasiOnboarding.route else DestinasiLogin.route
     NavHost(
         navController = navController,
-        startDestination = DestinasiLogin.route,
+        startDestination = startDest,
         modifier = modifier
     ) {
+        //SCREEN ONBOARDING
+        composable(route = DestinasiOnboarding.route) {
+            OnboardingScreen(
+                onFinish = {
+                    navController.navigate(DestinasiLogin.route) {
+                        popUpTo(DestinasiOnboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        //SCREEN BANTUAN
+        composable(route = DestinasiHelp.route) {
+            HelpScreen(
+                navigateBack = { navController.popBackStack() }
+            )
+        }
+
         //LOGIN SCREEN
         composable(route = DestinasiLogin.route) {
             val viewModel: LoginViewModel = viewModel(factory = PenyediaViewModel.Factory)
@@ -70,15 +93,16 @@ fun PetaNavigasi(
             DashboardScreen(
                 navigateToItemEntry = { navController.navigate(DestinasiEntry.route) },
                 navigateToPatientEntry = { navController.navigate("tambah_pasien") },
+                navigateToHelp = { navController.navigate(DestinasiHelp.route) },
                 onItemClick = { itemId ->
                     navController.navigate("${DestinasiDetail.route}/$itemId")
                 },
                 //LOGOUT
                 onLogout = {
                     scope.launch {
-                        userPreferences.clearSession() // Hapus Token
+                        userPreferences.clearSession()
                         navController.navigate(DestinasiLogin.route) {
-                            popUpTo(0) { inclusive = true } // Hapus backstack agar tidak bisa kembali
+                            popUpTo(0) { inclusive = true }
                         }
                     }
                 }

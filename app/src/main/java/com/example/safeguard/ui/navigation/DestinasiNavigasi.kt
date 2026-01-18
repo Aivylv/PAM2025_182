@@ -29,3 +29,13 @@ object DestinasiDetail : DestinasiNavigasi {
     override val route = "detail_barang"
     override val titleRes = "Detail Barang"
 }
+
+object DestinasiOnboarding : DestinasiNavigasi {
+    override val route = "onboarding"
+    override val titleRes = "Selamat Datang"
+}
+
+object DestinasiHelp : DestinasiNavigasi {
+    override val route = "bantuan"
+    override val titleRes = "Pusat Bantuan"
+}
