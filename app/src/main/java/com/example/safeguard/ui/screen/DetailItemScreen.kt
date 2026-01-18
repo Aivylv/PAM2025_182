@@ -2,6 +2,7 @@ package com.example.safeguard.ui.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.example.safeguard.ui.viewmodel.EditItemViewModel
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.launch
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,6 +175,29 @@ fun DetailItemScreen(
                     }
 
                 } else {
+                    if (!item.photo_path.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = "http://10.0.2.2:3000/uploads/${item.photo_path}", // Sesuaikan IP Backend Anda
+                            contentDescription = "Foto Bukti Barang",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp) // Sedikit diperbesar agar jelas
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .padding(bottom = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Tidak ada foto bukti", color = Color.Gray)
+                        }
+                    }
                     DetailRow("Nama Barang", item.item_name)
                     DetailRow("Pemilik", "${item.patient_name ?: "-"} (${item.rm_number ?: "-"})")
                     DetailRow("Kondisi", item.condition)
