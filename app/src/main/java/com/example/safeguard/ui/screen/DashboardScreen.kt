@@ -115,7 +115,7 @@ fun DashboardBody(
         is DashboardUiState.Loading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         is DashboardUiState.Success -> {
             if (uiState.items.isEmpty()) {
-                Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Tidak ada data barang.") }
+                Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Belum ada barang titipan") }
             } else {
                 ListItemList(items = uiState.items, onItemClick = onItemClick, modifier = modifier)
             }

@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.safeguard.network.AuthApiService
 import com.example.safeguard.repository.UserPreferences
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 data class LoginUiState(
     val email: String = "",
@@ -32,8 +34,16 @@ class LoginViewModel(
     fun onPasswordChange(password: String) {
         uiState = uiState.copy(password = password, errorMessage = null)
     }
-
+    fun validateInput(): Boolean {
+        if (uiState.email.isBlank() || uiState.password.isBlank()) {
+            uiState = uiState.copy(errorMessage = "Email dan Password tidak boleh kosong")
+            return false
+        }
+        return true
+    }
     fun login(onLoginSuccess: () -> Unit) {
+        if (!validateInput()) return
+
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true, errorMessage = null)
             try {
@@ -41,7 +51,6 @@ class LoginViewModel(
 
                 if (response.success) {
 
-                    //simpan session token & user_id
                     userPreferences.saveSession(
                         response.token ?: "",
                         response.user?.user_id.toString()
@@ -50,11 +59,19 @@ class LoginViewModel(
                     uiState = uiState.copy(isLoading = false, success = true)
                     onLoginSuccess()
                 } else {
-                    uiState = uiState.copy(isLoading = false, errorMessage = response.message)
+                    uiState = uiState.copy(isLoading = false, errorMessage = "Email atau Password salah")
                 }
+            } catch (e: HttpException) {
+                val errorMsg = when (e.code()) {
+                    400 -> "Email atau Password salah"
+                    404, 401 -> "Email atau Password salah"
+                    else -> "Gagal terhubung ke server (${e.code()})"
+                }
+                uiState = uiState.copy(isLoading = false, errorMessage = errorMsg)
+            } catch (e: IOException) {
+                uiState = uiState.copy(isLoading = false, errorMessage = "Koneksi internet bermasalah")
             } catch (e: Exception) {
-                //tampilkan pesan error asli untuk debugging
-                uiState = uiState.copy(isLoading = false, errorMessage = "Error: ${e.message}")
+                uiState = uiState.copy(isLoading = false, errorMessage = "Terjadi kesalahan: ${e.message}")
             }
         }
     }

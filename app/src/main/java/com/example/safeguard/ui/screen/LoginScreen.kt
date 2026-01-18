@@ -1,5 +1,6 @@
 package com.example.safeguard.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.safeguard.ui.viewmodel.LoginViewModel
 import com.example.safeguard.R
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun LoginScreen(
@@ -25,6 +27,13 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = "Logo SafeGuard",
+            modifier = Modifier
+                .size(150.dp)
+                .padding(bottom = 24.dp)
+        )
         Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacer_large)))
@@ -60,20 +69,20 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacer_large)))
 
-        //INDIKATOR LOADING & DISABLE TOMBOL
         Button(
             onClick = { viewModel.login(onLoginSuccess) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isLoading
         ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
-                )
+                CircularProgressIndicator()
             } else {
-                Text(stringResource(R.string.btn_login))
+                Button(
+                    onClick = { viewModel.login(onLoginSuccess) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Masuk")
+                }
             }
         }
 
