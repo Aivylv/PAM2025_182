@@ -186,7 +186,7 @@ fun DetailItemScreen(
 
                     if (item.status == "Dikembalikan") {
                         DetailRow("Diterima Oleh", item.receiver ?: "-")
-                        DetailRow("Tanggal Masuk", item.entry_date ?: "-")
+                        DetailRow("Tanggal Dikembalikan", item.return_date ?: "Baru saja")
                     }
 
                     Spacer(Modifier.height(24.dp))

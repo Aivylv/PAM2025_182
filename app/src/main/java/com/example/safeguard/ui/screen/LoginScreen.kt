@@ -13,6 +13,9 @@ import androidx.compose.ui.unit.dp
 import com.example.safeguard.ui.viewmodel.LoginViewModel
 import com.example.safeguard.R
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun LoginScreen(
@@ -34,8 +37,15 @@ fun LoginScreen(
                 .size(150.dp)
                 .padding(bottom = 24.dp)
         )
-        Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
-
+        Text(
+            text = stringResource(R.string.app_name).uppercase(),
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontWeight = FontWeight.Light,
+                letterSpacing = 4.sp,
+                fontFamily = FontFamily.SansSerif,
+                color = MaterialTheme.colorScheme.primary
+            )
+        )
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacer_large)))
 
         OutlinedTextField(
